@@ -1,0 +1,1 @@
+The bmp180 is a temperature and pressure sensor. Run the script runMe.sh (you need the other scripts as well) on the BBG to see the temperature.
