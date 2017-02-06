@@ -33,6 +33,7 @@ int PIN_READ(ulong* pinconf1){
     // and if you do this, then when you write and read it will never be
     // what you wrote the pin to be
     //PIN_INPUT(); 
+
     return pinconf1[GPIO_DATAIN/4] & (1  << GPIO_PIN_NUMBER);
 } 
 
@@ -48,12 +49,19 @@ int PIN_READ(ulong* pinconf1){
     } \
 }
 
+// am2302
+#define NUM_BITS_DATA     (40)
+#define NUM_BITS_RH       (16)
+#define NUM_BITS_T        (16)
+#define NUM_BITS_SUM      (8)
+#define CONVERSION_FACTOR (10.0) // divide by 10
 
 // state machine
 #define STATE_IDLE     (0)
 #define STATE_COMMAND  (1)
 #define STATE_RESPONSE (2)
 #define STATE_DATA     (3)
+#define STATE_CALC     (4)
 bool globalStartMeasuring = false; // used to trigger a sensor read
 
 using namespace std;
@@ -77,6 +85,8 @@ void print(char * message)
 // "pinValueToWaitFor" must be either PIN_HIGH or PIN_LOW
 int waitForTransition(ulong *pinconf1, int pinValueToWaitFor, int timeoutUS)
 {
+    PIN_INPUT();
+
     int countUS = 0;
     while(true)
     {
@@ -101,7 +111,7 @@ int waitForTransition(ulong *pinconf1, int pinValueToWaitFor, int timeoutUS)
 
 int main()
 {
-    // setup out CTRL+C signal handler
+    // setup CTRL+C signal handler
     struct sigaction sa;
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
@@ -142,6 +152,7 @@ int main()
     int lastState = STATE_IDLE;
     int state = STATE_IDLE;
     int nextState = STATE_IDLE;
+    int data[NUM_BITS_DATA];
     while(true)
     {
         // implement the next state
@@ -154,9 +165,16 @@ int main()
         }
 
         // idle
-        if(state == STATE_IDLE){
+        if(state == STATE_IDLE)
+        {
             if(globalStartMeasuring == true)
             {
+                // clear data
+                for(int x = 0; x < NUM_BITS_DATA; x++)
+                {
+                    data[x] = 0;
+                }
+
                 nextState = STATE_COMMAND;
                 print("\nIdle > Command");
                 globalStartMeasuring = false;
@@ -164,10 +182,11 @@ int main()
         }
 
         // command the sensor to begin sampling
-        if(state == STATE_COMMAND){
+        if(state == STATE_COMMAND)
+        {
             PIN_WRITE(PIN_LOW);
             printf("After put low [%d]\n", PIN_READ(pinconf1));
-            usleep(1100);
+            usleep(19000);
             PIN_WRITE(PIN_HIGH);
             nextState = STATE_RESPONSE;
 
@@ -176,12 +195,14 @@ int main()
         }
 
         // wait for the sensor to respond
-        if(state == STATE_RESPONSE){
-            bool validResponse = false;
-            int us = waitForTransition(pinconf1, PIN_LOW, 600);
+        if(state == STATE_RESPONSE)
+        {
+            // bbg waits for 20-40 us
+            int us = waitForTransition(pinconf1, PIN_LOW, 60);
             if(us == -1){
-                print("Sensor response timeout");
+                print("Sensor low response timeout");
                 nextState = STATE_IDLE;
+                continue;
             }else{
                 printf("Waited for [%d] us\n", us);
                 fflush(stdout);
@@ -189,7 +210,148 @@ int main()
                 // xxx KA testing
                 nextState = STATE_IDLE;
             }
+
+            // sensor pulls low for 80 us
+            us = waitForTransition(pinconf1, PIN_HIGH, 100);
+            if(us == -1){
+                print("Sensor high response timeout");
+                nextState = STATE_IDLE;
+                continue;
+            }
+
+            nextState = STATE_DATA;
         }
+
+        //*
+        // gather the data from the sensor
+        if(state == STATE_DATA)
+        {
+            // sensor stays high for 80 us
+            int us = waitForTransition(pinconf1, PIN_LOW, 100);
+            if(us == -1){
+                print("Sensor low 2 response timeout");
+                nextState = STATE_IDLE;
+                continue;
+            }
+
+            int x = 0;
+            for(x = 0; x < NUM_BITS_DATA; x++)
+            {
+                // sensor goes low for 50 us to indicate start of bit
+                us = waitForTransition(pinconf1, PIN_HIGH, 60);
+                if(us == -1){
+                    print("Sensor startbit response timeout");
+                    nextState = STATE_IDLE;
+                    break;
+                } 
+
+                // duration of high indicates whether it is a 1 or 0
+                us = waitForTransition(pinconf1, PIN_LOW, 80);
+                if(us == -1){
+                    printf("Sensor data bit [%d] timeout\n", x);
+                    fflush(stdout);
+                    nextState = STATE_IDLE;
+                    break;
+                } 
+
+                // 0 = 26 to 28 us, which we will say is < 30 us
+                // 1 = 70 us, which we will say it > 60 us
+                // if high-time is between 30 us and 60 us then we don't know the bit
+                if(us < 30)
+                {
+                    data[x] = 0;
+                }
+                else if(us > 60)
+                {
+                    data[x] = 1;
+                }
+                else
+                {
+                    printf("Sensor data bit [%d] for [%d] us is not distinguishable\n", x, us);
+                    fflush(stdout);
+                    nextState = STATE_IDLE;
+                    break;
+                }
+            }
+
+            // go back to idle state if there was an issue getting one bit
+            if(x < (NUM_BITS_DATA - 1)){
+                printf("Sensor data bit [%d] error. Going back to idle state\n", x, us);
+                fflush(stdout);
+                nextState = STATE_IDLE;
+                continue;
+            }
+
+            // if we made it this far, then we have a full data[] to decode
+            nextState = STATE_CALC;
+        }
+        //*/
+
+        // decode the data from the sensor into RH and T
+        // ex. 0000 0010 1000 1100 0000 0001 0101 1111 1110 1110
+        //     ---- ---- ---- ----                                 is RH data
+        //                         ---- ---- ---- ----             is T data
+        //                                             ---- ----   is checksum, where checksum = RH (2 bytes) + T (2 bytes) 
+
+        // ex. use RH to get relative humidity
+        // a) convert RH from binary to decimal
+        // b) divide by 10 to get relative humidity
+
+        // ex. use T to calculate temperature
+        // a) convert T from binary to decimal
+        // b) divide by 10 to get temperature
+        //*
+        if(state == STATE_CALC)
+        {
+            int rh = 0;
+            int t = 0;
+            int sum = 0;
+
+            // convert binary to decimal for rh, t and sum
+            printf("data =[");
+            for(int x = 0; x < NUM_BITS_DATA; x++)
+            {
+                printf("%d,", data[x]);
+
+                if(x < NUM_BITS_RH)
+                {
+                    rh += (data[x] << (NUM_BITS_RH - x - 1));
+                }
+                else if(x < NUM_BITS_T)
+                {
+                    t += (data[x] << (NUM_BITS_T - (x - NUM_BITS_RH) - 1));
+                }
+                else if(x < NUM_BITS_DATA)
+                {
+                    sum += (data[x] << (NUM_BITS_SUM - (x - NUM_BITS_RH - NUM_BITS_T) - 1));
+                }
+            }
+            printf("]");
+
+            printf("rh  = [%d]\n", rh);
+            printf("t   = [%d]\n", t);
+            printf("sum = [%d]\n", sum);
+            fflush(stdout);
+
+            print("Calculate checksum...");
+            int sumCalc = (rh + t) & (0x00FF); // get only the lower 8 bits of the sum
+            printf("sumCalc = [%d]\n", sumCalc);
+            fflush(stdout);
+            if(sum != sumCalc){
+                printf("Incorrect check sum!");
+                nextState = STATE_IDLE;
+                continue;
+            }
+
+            rh = rh/CONVERSION_FACTOR;
+            t = t/CONVERSION_FACTOR;
+
+            printf("Relative Humidity = [%d]    Temperature = [%d]\n", rh, t);
+            fflush(stdout);
+
+            nextState = STATE_IDLE;
+        }
+        //*/
 
         //usleep(1);
         //sleep(1);
@@ -216,21 +378,6 @@ int main()
         usleep(500000);
     }
     //*/
-
-    // ex. 0000 0010 1000 1100 0000 0001 0101 1111 1110 1110
-    //     ---- ---- ---- ----                                 is RH data
-    //                         ---- ---- ---- ----             is T data
-    //                                             ---- ----   is checksum, where checksum = RH (2 bytes) + T (2 bytes) 
-
-    // ex. use RH to get relative humidity
-    // a) convert RH from binary to decimal
-    // b) divide by 10 to get relative humidity
-
-    // ex. use T to calculate temperature
-    // a) convert T from binary to decimal
-    // b) divide by 10 to get temperature
-
-
 
     return 0;
 }
