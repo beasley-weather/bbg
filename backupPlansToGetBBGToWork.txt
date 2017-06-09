@@ -1,0 +1,47 @@
+BEASLEY GAME PLAN
+
+SITES:
+GOTO: https://press3.mcs.anl.gov/forest/hardware/beaglebone-black-software/ubuntu-12-04-boot-instructions/
+http://derekmolloy.ie/write-a-new-image-to-the-beaglebone-black/#Desktop_Linux_Alternative
+http://elinux.org/Beagleboard:BeagleBoneBlack_Debian#Expanding_File_System_Partition_On_A_microSD
+https://www.etcher.io/
+
+1. 
+Try to check in the /boot/ of the SD card to make sure it is a "flasher image": http://elinux.org/Beagleboard:BeagleBoneBlack_Debian#Expanding_File_System_Partition_On_A_microSD
+
+2.
+Rettry to burn new flasher image with
+https://www.etcher.io/ 
+
+3. 
+Try sudo imagewriter
+
+4.
+This mentioned the same problem I was having! Not being able to see anything when you plug the DD'd card back into the computer
+http://ceejbot.tumblr.com/post/54797160620/how-to-install-new-oses-on-your-beagle-bone-black
+
+5.
+PiFiller is for RaspPi, but it works for beaglebone too!
+
+6.
+Lots of options!
+http://elinux.org/RPi_Easy_SD_Card_Setup#SD_card_setup
+Start with
+Flashing the SD Card using Linux (including on a Raspberry Pi!)
+Using ImageWriter (graphical interface)
+because EVERYTHING else is for MacOSX	
+
+7. 
+Use something like this
+"
+Line up a microSD card with at least 2 gigs of space. 
+While you’re at it, get a USB adapter widget so you can 
+mount it on your favorite computer as a USB drive.
+"
+to use ImageWriter
+
+8.
+palimpsest to view hard drive info
+
+9.
+Try on a WINDOWS MACHINE to build the image.
