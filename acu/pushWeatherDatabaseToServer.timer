@@ -1,0 +1,10 @@
+[Unit]
+Description=Every hour push the current database of weather data to the Beasley Neighborhood Association Weather Station Server. This is the .timer file for the systemd facility.
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=60min
+Unit=pushWeatherDatabaseToServer.service
+
+[Install]
+WantedBy=multi-user.target

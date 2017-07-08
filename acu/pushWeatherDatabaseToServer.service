@@ -1,0 +1,6 @@
+[Unit]
+Description=Every hour push the current database of weather data to the Beasley Neighborhood Association Weather Station Server. This is the .service file for the systemd facility.
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/pushWeatherDatabaseToServerSCP.sh
