@@ -12,6 +12,8 @@ SERVER_USER=badger
 # exit at the first failure
 set -e
 
+echo -e "\n"
+
 while true; do
     read -p "Do you wish to setup BeagleBone as Beasley Weather Staion? [y/n]" yn
     case $yn in
