@@ -3,7 +3,9 @@ Description=Every hour at the 50th minute push the current database of weather d
 
 [Timer]
 OnCalendar=*-*-* *:50:00
+OnBootSec=1min
 OnActiveSec=15
+AccuracySec=1
 Unit=pushWeatherDatabaseToServer.service
 
 [Install]

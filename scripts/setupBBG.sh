@@ -5,9 +5,13 @@
 # "Beasley Weather Station Embedded Device" which pulls database from
 # an Acurite weather station and pushes to a database
 
-BBG_SCRIPTS_DIR=/home/badger/beasley-weather-station/bbg/scripts
 BBG_USER=badger
 SERVER_USER=badger
+BBG_SCRIPTS_DIR=/home/$USER/beasley-weather-station/bbg/scripts
+BBG_LOG_DIR=/home/$USER/beasley-weather-station/bbg/log
+BBG_DB_DIR=/home/$USER/beasley-weather-station/bbg/db
+BBG_LOG_FILE_NAME=bbg.log
+BBG_LOG=$BBG_LOG_DIR/$BBG_LOG_FILE_NAME
 
 # exit at the first failure
 set -e
@@ -48,6 +52,16 @@ fi
 #cp util/init.d/weewx.debian /etc/init.d/weewx
 #chmod +x /etc/init.d/weewx
 #update-rc.d weewx defaults 98
+
+# if the beaglebone green log file is not created, create it now
+echo -e "\nChecking to see if bbg log file exists..."
+if [[ ! -f $BBG_LOG ]]; then
+	echo -e "\nCreate bbg log file [" $BBG_LOG "]"
+	mkdir -p $BBG_LOG_DIR
+	touch $BBG_LOG
+else
+	echo "...log file exists."
+fi
 
 # start process that will push database file to the server every hour
 ./startEnableSystemDTimer.sh
