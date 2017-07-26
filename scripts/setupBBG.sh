@@ -5,7 +5,7 @@
 # "Beasley Weather Station Embedded Device" which pulls database from
 # an Acurite weather station and pushes to a database
 
-BBG_SCRIPTS_DIR=/home/badger/beasley-weather-station/bbg/acu/scripts
+BBG_SCRIPTS_DIR=/home/badger/beasley-weather-station/bbg/scripts
 BBG_USER=badger
 SERVER_USER=badger
 
