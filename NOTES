@@ -45,3 +45,92 @@ palimpsest to view hard drive info
 
 9.
 Try on a WINDOWS MACHINE to build the image.
+ 1749  sudo iptables -A POSTROUTING -t nat -j MASQUERADE
+ 1751  sudo iptables -A POSTROUTING -t nat -j MASQUERADE
+ 1753  iptables --table nat --append POSTROUTING --out-interface wlan0 -j MASQUERADE
+ 1754  sudo iptables --table nat --append POSTROUTING --out-interface wlan0 -j MASQUERADE
+ 1756  iptables --append FORWARD --in-interface enx04a316df32ab -j ACCEPT
+ 1757  sudo iptables --append FORWARD --in-interface enx04a316df32ab -j ACCEPT
+ 1762  sudo iptables --table nat --append POSTROUTING --out-interface wlp5s0 -j MASQUERADE
+ 1897  man iptables
+ 1898  iptables
+ 1899  iptables -t filter
+ 1900  iptables -h
+ 1901  iptables
+ 1902  iptables -t filter --list-rules
+ 1903  iptables --list-rules
+ 1904  sudo iptables --list-rules
+ 1905  sudo iptables -t filter --list-rules
+ 1908  sudo iptables -t filter --list-rules
+ 1916  man iptables
+ 1917  sudo iptables -t filter --list-rules
+ 1918  sudo iptables -t filter -d 13
+ 1919  man iptables
+ 1920  sudo iptables -L
+ 1922  sudo iptables -S
+ 1923  sudo iptables -L
+ 1924  sudo iptables -L --line-numbers
+ 1925  sudo iptables -D FORWARD 3
+ 1926  sudo iptables -L --line-numbers
+ 1927  sudo iptables -D FORWARD 3
+ 1928  sudo iptables -L --line-numbers
+ 1969  man iptables
+ 1974  sudo iptables -L
+ 1975  sudo iptable -L --line-numbers
+ 1976  sudo iptables -L --line-numbers
+ 1977  sudo iptables -D FORWARD 4
+ 1978  sudo iptable -L --line-numbers
+ 1979  sudo iptables -L --line-numbers
+ 2024  iptables
+ 2025  iptables -h
+ 2026  iptables -L
+ 2027  iptables -table FILTER
+ 2028  history | grep iptab
+ 2029  sudo iptables -L
+ 2033  history | grep iptab
+ 2034  history | grep iptab >> NOTES 
+ 1749  sudo iptables -A POSTROUTING -t nat -j MASQUERADE
+ 1751  sudo iptables -A POSTROUTING -t nat -j MASQUERADE
+ 1753  iptables --table nat --append POSTROUTING --out-interface wlan0 -j MASQUERADE
+ 1754  sudo iptables --table nat --append POSTROUTING --out-interface wlan0 -j MASQUERADE
+ 1756  iptables --append FORWARD --in-interface enx04a316df32ab -j ACCEPT
+ 1757  sudo iptables --append FORWARD --in-interface enx04a316df32ab -j ACCEPT
+ 1762  sudo iptables --table nat --append POSTROUTING --out-interface wlp5s0 -j MASQUERADE
+ 1897  man iptables
+ 1898  iptables
+ 1899  iptables -t filter
+ 1900  iptables -h
+ 1901  iptables
+ 1902  iptables -t filter --list-rules
+ 1903  iptables --list-rules
+ 1904  sudo iptables --list-rules
+ 1905  sudo iptables -t filter --list-rules
+ 1908  sudo iptables -t filter --list-rules
+ 1916  man iptables
+ 1917  sudo iptables -t filter --list-rules
+ 1918  sudo iptables -t filter -d 13
+ 1919  man iptables
+ 1920  sudo iptables -L
+ 1922  sudo iptables -S
+ 1923  sudo iptables -L
+ 1924  sudo iptables -L --line-numbers
+ 1925  sudo iptables -D FORWARD 3
+ 1926  sudo iptables -L --line-numbers
+ 1927  sudo iptables -D FORWARD 3
+ 1928  sudo iptables -L --line-numbers
+ 1969  man iptables
+ 1974  sudo iptables -L
+ 1975  sudo iptable -L --line-numbers
+ 1976  sudo iptables -L --line-numbers
+ 1977  sudo iptables -D FORWARD 4
+ 1978  sudo iptable -L --line-numbers
+ 1979  sudo iptables -L --line-numbers
+ 2024  iptables
+ 2025  iptables -h
+ 2026  iptables -L
+ 2027  iptables -table FILTER
+ 2028  history | grep iptab
+ 2029  sudo iptables -L
+ 2033  history | grep iptab
+ 2034  history | grep iptab >> NOTES 
+ 2037  history | grep iptab >> NOTES 
