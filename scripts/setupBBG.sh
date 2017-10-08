@@ -33,6 +33,7 @@ cd $BBG_SCRIPTS_DIR
 
 echo -e "\nInstall utilities..."
 wget http://ftp.debian.org/debian/pool/main/i/iwatch/iwatch_0.2.2-2_all.deb
+mkdir -p ~/Downloads/
 mv -v iwatch_0.2.2-2_all.deb ~/Downloads/iwatch_0.2.2-2_all.deb
 sudo dpkg -i iwatch_0.2.2-2_all.deb
 
