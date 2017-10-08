@@ -41,13 +41,14 @@ sudo apt-get install python-configobj python-cheetah python-serial python-usb
 echo -e "\nGoing to download and install weewx, but only if I don't find it in your downloads directory..."
 if [ ! -f ~/Downloads/weewx_3.6.2-1_all.deb ];
 	then
-	wget wget http://weewx.com/downloads/released_versions/weewx_3.6.2-1_all.deb
-	mv weewx_3.6.2-1_all.deb ~/Downloads/weewx_3.6.2-1_all.deb 
+	wget http://weewx.com/downloads/released_versions/weewx_3.6.2-1_all.deb
+	mv -v weewx_3.6.2-1_all.deb ~/Downloads/weewx_3.6.2-1_all.deb 
 	sudo dpkg -i ~/Downloads/weewx_3.6.2-1_all.deb 
 fi
 
 # Configure and run weewx
 # http://weewx.com/docs/usersguide.htm#Running_as_a_daemon 
+# "If you use a packaged install from a DEB or RPM distribution, this is done automatically. You can ignore this section."
 # Uncomment the following:
 #cp util/init.d/weewx.debian /etc/init.d/weewx
 #chmod +x /etc/init.d/weewx
