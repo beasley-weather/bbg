@@ -33,11 +33,10 @@ cd $BBG_SCRIPTS_DIR
 
 echo -e "\nInstall utilities..."
 wget http://ftp.debian.org/debian/pool/main/i/iwatch/iwatch_0.2.2-2_all.deb
-mkdir -p ~/Downloads/
-mv -v iwatch_0.2.2-2_all.deb ~/Downloads/iwatch_0.2.2-2_all.deb
 sudo dpkg -i iwatch_0.2.2-2_all.deb
 
 echo -e "\nInstall weewx dependencies..."
+sudo apt-get update
 sudo apt-get install python-configobj python-cheetah python-serial python-usb
 
 # get weewx from the internet and install it
