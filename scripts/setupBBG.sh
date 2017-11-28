@@ -19,7 +19,7 @@ set -e
 echo -e "\n"
 
 while true; do
-    read -p "Do you wish to setup BeagleBone as Beasley Weather Staion? [y/n]" yn
+    read -p "Do you wish to setup BeagleBone as Beasley Weather Station? [y/n]" yn
     case $yn in
         [Yy]* )
 			echo "Continuing with BB setup..." 

@@ -1,0 +1,183 @@
+DOCKER NOTES
+
+# INFO
+docker --version
+docker help cp  #replace cp with any other docker command
+docker image ls
+docker container ls
+docker system df
+
+# INFO ABOUT CONTAINERS
+-docker logs mailer
+docker logs agent
+The logs for mailer should look something like this:
+CH2 Example Mailer has started.
+The logs for agent should contain several lines like the one you watched it write when
+you started the container:
+System up.
+TIP The docker logs command has a flag, --follow or -f , that will display
+the logs and then continue watching and updating the display with changes
+to the log as they occur. When you’ve finished, press Ctrl (or Command) and
+the C key to interrupt the logs command.
+docker exec namespaceA ps
+docker exec namespaceB ps # where namespaceB is the name of the container specified by --exec. This will run the "ps" command INSIDE of the container, as if you are a process in the container running that command in the shell
+-docker exec 7cb5d2b9a7ea ps # can use the first 12 chars of the container hash instead of the whole hash, instead of the container name
+-get container IDs in a shell script CID=$(docker ps --latest --quiet) # If you want to get the full container ID , you can use the --no-trunc
+option on the docker ps command.
+
+# INSPECT
+docker inspect 
+
+# BUILD
+docker build -t yourImageName .
+
+# RUN
+-# `docker create ...` + `docker start ...` == `docker run ...`: The containers need to be started in
+reverse order of their dependency chain.
+-# inject an environment variable with -e or --env ENV_VAR="the env var string"
+-docker run -p 4000:80 yourImageName (-p reassigns for 4000 to be the port 80 in the image)
+-docker run --detach --name web nginx:latest  # name the container "web", detach makes it run in the background
+-docker run -it ubuntu bash
+-docker run --interactive --tty \    # can be shortened to -it like above
+--link web:web \
+--name web_test \
+busybox:latest /bin/sh
+First, the --interactive option tells Docker to keep the standard input
+stream (stdin) open for the container even if no terminal is attached. Second, the
+--tty option tells Docker to allocate a virtual terminal for the container, which will
+allow you to pass signals to the container. This is usually what you want from an inter-
+active command-line program.
+It’s possible to create an interactive container, manually start a process inside that
+container, and then detach your terminal. You can do so by holding down the Crtl (or
+Control) key and pressing P and then Q. This will work only when you’ve used the
+--tty option.
+-In the future, if you’re experimenting with short-lived containers, you can avoid
+the cleanup burden by specifying --rm on the command. Doing so will automatically
+remove the container as soon as it enters the exited state.
+
+
+# CONTAINER MANAGEMENT
+docker login
+docker tag imageHash arscotkm/test-repo:python-app-1
+docker push arscotkm/yourImageName:latest (latest is the repo?)
+
+# CONTAINER CONTROL
+-docker kill containerID (from `docker container ls`)
+-docker restart containerName
+-The docker CLI makes it is
+easy to compose a quick cleanup command:
+docker rm -vf $(docker ps -a -q)
+
+
+Using the --restart flag at
+container-creation time, you can tell Docker to do any of the following:
+1. Never restart (default)
+2. Attempt to restart when a failure is detected
+3. Attempt for some predetermined time to restart when a failure is detected
+4. Always restart the container regardless of the condition
+
+
+When all the processes in a container have exited, that container will enter the
+exited state. Remember, a Docker container can be in one of four states:
+1. Running
+2. Paused
+3. Restarting
+4. Exited (also used if the container has never been started)
+
+# GOOD DESIGN
+A supervisor process, or init process, is a program that’s used to launch and maintain
+the state of other programs. On a Linux system, PID #1 is an init process. It starts all
+the other system processes and restarts them in the event that they fail unexpectedly.
+It’s a common practice to use a similar pattern inside containers to start and manage
+processes.
+Using a supervisor process inside your container will keep the container running
+in the event that the target process—a web server, for example—fails and is restarted.
+There are several programs that might be used inside a container. The most popular
+include init , systemd , runit , upstart , and supervisord . Publishing software that
+uses these programs is covered in chapter 8. For now, take a look at a container that
+uses supervisord .
+
+# ENTRY POINTS
+docker run --entrypoint="cat" wordpress:4 /entrypoint.sh    # Pass /entrypoint.sh as the argument to cat
+
+# To stop and remove a container from your computer (essentially uninstall)
+docker stop # put a container in the "exit" state, so that rm can work
+docker rm   # remove a container from your computer
+
+
+# REPOSITORIES
+Registry host
++ User name
++ Short name
+=quay.io/dockerinaction/ch3_hello_registry:tagName (you don't need to specify :tagName, if you want to get ALL of the SW)
+
+VOLUMES
+docker run -v (or --volume) /var/db/tables:/var/data1 -it debian bash  # the directory /var/db/tables as /var/data1
+-v defines a volume when you create a container
+
+
+BIND MOUNT VOLUMES
+-docker run -d --name bmweb -v ~/example-docs:/usr/local/apache2/htdocs:ro -p 80:80 httpd:latest # shares
+ your document with a webserver. When you plop example-docs on htdocs, you are overwriting! The extra :ro makes it 
+ read only in the container
+
+ kyle: ~/career/professional_development
+$ docker run --rm \
+> -v ~/example-docs:/testspace:ro \
+> alpine \
+> /bin/sh -c 'echo test > /testspace/test'
+Unable to find image 'alpine:latest' locally
+latest: Pulling from library/alpine
+b56ae66c2937: Pull complete 
+Digest: sha256:d6bfc3baf615dc9618209a8d607ba2a8103d9c8a405b3bd8741d88b4bef36478
+Status: Downloaded newer image for alpine:latest
+/bin/sh: can't create /testspace/test: Read-only file system
+kyle: ~/career/professional_development
+$ docker run --rm -v ~/example-docs:/testspace:ro alpine /bin/sh -c 'echo test > /testspace/test'
+/bin/sh: can't create /testspace/test: Read-only file system
+kyle: ~/career/professional_development
+$ 
+kyle: ~/career/professional_development
+$ docker run --rm -v ~/example-docs:/testspace:ro alpine /bin/sh -c 'uname -a'
+Linux 9ab30fb1ab8f 4.8.14-040814-generic #201612101431 SMP Sat Dec 10 19:33:51 UTC 2016 x86_64 Linux
+
+The important thing to note in this case is that the file must exist on the host
+before you create the container. Otherwise, Docker will assume that you wanted to use
+a directory, create it on the host, and mount it at the desired location (even if that
+location is occupied by a file).
+
+DOCKER MANAGED VOLUMES
+pg 65
+If you use the -v, but only use one directory name, then that will be the location of the DMV in the container.
+On the host, docker will create a special place that it manages the data.
+Use the INSPECT docker command to view volumes for containers
+ex. docker inspect -f "{{json .Volumes}}" cass-shared (where cass-shared is the container name)
+--volumes-from flag. It copies any volume
+present on a referenced source container into the new container.
+ex. docker run --name reader \
+--volumes-from fowler \
+--volumes-from knuth \
+alpine:latest ls -l /library/
+-pg 68 3 situations where you can't use --volumes-from
+
+REMOVING VOLUMES
+ex. docker rm -v NAME to remove the volumes associated with the container
+
+Left at pg 74 in book1.pdf
+Skip pg 44 to 51
+pg 51 to 55 was a bit of a blur
+Chapter 4
+
+
+
+
+
+
+BOOK 2
+pg 12 Writing a Dockerfile
+Create an image
+1. docker build .
+2. docker tag 66c76cea05bb todoapp # rename the built image from 1. to the name "todoapp"
+
+docker diff NAME_OF_CONTAINER # shows you all the changes made to an image since a container was made from it
+

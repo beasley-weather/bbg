@@ -1,0 +1,76 @@
+BBG Docker Design.txt
+
+Image Requirements:
+-weewx
+-volume to store timestamp
+
+NAME OF IMAGE
+bbgImage
+
+CREATE IMAGE
+dockerfile
+
+# create directory /home/badger/beasley-weather-station/bbg/
+
+NAME OF CONTAINER
+bbgContainer
+
+CREATE IMAGE AND SAVE IMAGE TO REPO
+kyle: ~/beasley-weather-station/bbg/docker/docker-bbg
+$ docker build -f DockerfileBBG --label BBGImage -t arscotkm/beasleyweatherstation:v0.0.1 .
+kyle: ~/beasley-weather-station/bbg/docker/docker-bbg
+$ docker images
+REPOSITORY                       TAG                 IMAGE ID            CREATED             SIZE
+arscotkm/beasleyweatherstation   v0.0.1              dcaec875ad7d        11 minutes ago      89.1 MB
+<none>                           <none>              879e4d110ad0        16 minutes ago      89.1 MB
+<none>                           <none>              728320f481e1        16 minutes ago      89.1 MB
+<none>                           <none>              49e49f045c73        17 minutes ago      89.1 MB
+<none>                           <none>              c16257243628        19 minutes ago      89.1 MB
+<none>                           <none>              cb166394a4e7        20 minutes ago      89.1 MB
+<none>                           <none>              63e284fc8305        23 minutes ago      89.1 MB
+<none>                           <none>              b8f91a36dbd8        30 minutes ago      89.1 MB
+<none>                           <none>              8a8d07a06c1d        30 minutes ago      89.1 MB
+python                           latest              79e1dc9af1c1        3 weeks ago         691 MB
+python                           3.6.3-alpine        343a1ad30061        3 weeks ago         89.1 MB
+alpine                           latest              053cde6e8953        3 weeks ago         3.96 MB
+arscotkm/friendlyhello           latest              e36fd868fca6        6 weeks ago         195 MB
+friendlyhello                    latest              e36fd868fca6        6 weeks ago         195 MB
+ubuntu                           latest              747cb2d60bbe        6 weeks ago         122 MB
+python                           2.7-slim            9724e90f1f17        6 weeks ago         184 MB
+hello-world                      latest              05a3bd381fc2        2 months ago        1.84 kB
+kyle: ~/beasley-weather-station/bbg/docker/docker-bbg
+$ docker push arscotkm/beasleyweatherstation:v0.0.1
+The push refers to a repository [docker.io/arscotkm/beasleyweatherstation]
+0e70df567109: Pushed 
+dad68a5160d9: Pushed 
+365b25cc3611: Pushed 
+fe024326780e: Pushed 
+cf327ccfe249: Pushed 
+4f9a523f34f9: Pushed 
+aa92fb4e4eb0: Pushed 
+12211dbcbe79: Pushed 
+ef763da74d91: Pushed 
+v0.0.1: digest: sha256:c3b1fbc69c4836ae8420e199345c34b5a1d887a8084aab5b47afbd5cc1f4907b size: 2197
+
+
+RUN THE IMAGE TO MAKE A CONTAINER
+kyle: ~/beasley-weather-station/bbg/docker/docker-bbg
+$ docker run -d arscotkm/beasleyweatherstation:v0.0.1
+a8632c8b23fac3748ff0d95a0db6426bff78ae3bb61ef7031f00eee22e319766
+ex. 
+root: ~/beasley-weather-station/bbg/docker
+$ docker run --rm --name bbgContainer -v /home/badger/:/home/badger/ alpine /bin/sh -c 'cat /home/badger/bbg.json'
+{
+    web: 
+    { 
+        unixTimeStampLastSentWeewxDatabaseEntry: 1511313546 
+    }
+}
+
+FORMAT OF bbgBeasleyWeather.json
+{
+    "web": 
+    { 
+        "unixTimeStampLastSentWeewxDatabaseEntry": "1511313546" 
+    }
+}

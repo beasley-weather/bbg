@@ -1,0 +1,17 @@
+FROM python:3.6.3-alpine
+MAINTAINER Kyle Arscott	"arscotkm@mcmaster.ca"
+
+RUN adduser -h /home/badger -D badger
+ENV APPROOT="/home/badger/docker"
+WORKDIR $APPROOT
+ADD . $APPROOT
+EXPOSE 80
+ENV NAME World
+USER badger:badger
+
+RUN uname -a > /home/badger/computer.txt \
+	&& cd $APPROOT \
+	#&& wget http://ftp.debian.org/debian/pool/main/i/iwatch/iwatch_0.2.2-2_all.deb \
+	#&& sudo dpkg -i iwatch_0.2.2-2_all.deb
+
+CMD ["python", "./varunsWebPage.py"]
