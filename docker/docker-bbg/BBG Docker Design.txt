@@ -1,8 +1,21 @@
 BBG Docker Design.txt
 
 Image Requirements:
--weewx
--volume to store timestamp
+IN PROGRESS: weewx
+DONE: volume to store timestamp
+IN PROGRESS: install dependencies from varuns dts-client/server requirements.txt
+echo -e "\nInstall weewx dependencies..."
+sudo apt-get update
+sudo apt-get install python-configobj python-cheetah python-serial python-usb
+
+# get weewx from the internet and install it
+echo -e "\nGoing to download and install weewx, but only if I don't find it in your downloads directory..."
+if [ ! -f ~/Downloads/weewx_3.6.2-1_all.deb ];
+	then
+	wget http://www.weewx.com/downloads/released_versions/weewx-3.6.2.tar.gz
+	mv -v weewx-3.6.2.tar.gz ~/Downloads/weewx-3.6.2.tar.gz 
+fi
+
 
 NAME OF IMAGE
 bbgImage

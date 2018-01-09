@@ -1,7 +1,9 @@
-FROM python:3.6.3-alpine
+FROM python-2-and-3:latest
 MAINTAINER Kyle Arscott	"arscotkm@mcmaster.ca"
 
 RUN adduser -h /home/badger -D badger
+Run apt-get install usermod
+RUN usermod -aG sudo badger            # HOW DO I GET THIS TO RUN, I CAN'T INSTALL Apt-get
 ENV APPROOT="/home/badger/docker"
 WORKDIR $APPROOT
 ADD . $APPROOT
@@ -9,9 +11,27 @@ EXPOSE 80
 ENV NAME World
 USER badger:badger
 
-RUN uname -a > /home/badger/computer.txt \
-	&& cd $APPROOT \
-	#&& wget http://ftp.debian.org/debian/pool/main/i/iwatch/iwatch_0.2.2-2_all.deb \
-	#&& sudo dpkg -i iwatch_0.2.2-2_all.deb
+#RUN apt-get install
+
+#RUN uname -a > /home/badger/computer.txt \
+#	&& cd $APPROOT \
+
+# INSTALL WEEWX
+# Varun, I am following instructions at http://weewx.com/docs/macos.htm
+# How can I install these more succinctly?
+RUN sudo pip install pysqlite
+RUN sudo pip install configobj
+RUN sudo pip install Cheetah
+RUN sudo pip install PIL
+RUN sudo pip install pyserial
+RUN sudo pip install pyusb
+RUN sudo pip install pyephem
+# install weewx via Python 2.7 from a tar.gz file with the help of http://weewx.com/docs/macos.htm
+RUN wget --directory-prefix=~/Downloads http://www.weewx.com/downloads/released_versions/weewx-3.6.2.tar.gz
+RUN tar xvfz ~/Downloads/weewx-3.6.2.tar.gz
+RUN cd ~/Downloads/weewx-3.6.2
+RUN python2 setup.py install
+
+
 
 CMD ["python", "./varunsWebPage.py"]
