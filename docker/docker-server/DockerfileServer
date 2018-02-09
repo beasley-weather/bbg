@@ -1,9 +1,10 @@
-FROM python-2-and-3:latest
+FROM python:alpine
 MAINTAINER Kyle Arscott	"arscotkm@mcmaster.ca"
 
 RUN adduser -h /home/badger -D badger sudo
 ENV APPROOT="/home/badger/docker"
 ENV DATABASE_SERVER_ADDRESS="192.168.999.shutup"
+ENV SQLITE_DATABASE_FILE="/var/html/www/....../archive.sdb"
 ENV PORT="6969"
 WORKDIR $APPROOT
 ADD . $APPROOT
@@ -17,8 +18,7 @@ RUN pip install pysqlite configobj Cheetah Pillow pyserial pyusb pyephem pipenv
 
 RUN cd /home/badger/
 RUN git clone https://github.com/beasley-weather/beasley-weather-station.git
-RUN git clone https://github.com/beasley-weather/bbg.git
-RUN git clone https://github.com/beasley-weather/dts-client.git
+RUN git clone https://github.com/beasley-weather/dts-server.git
 
 # install weewx via Python 2.7 from a tar.gz file with the help of http://weewx.com/docs/macos.htm
 RUN wget --directory-prefix=~/Downloads http://www.weewx.com/downloads/released_versions/weewx-3.6.2.tar.gz
@@ -26,8 +26,8 @@ RUN tar xvfz ~/Downloads/weewx-3.6.2.tar.gz
 RUN cd ~/Downloads/weewx-3.6.2
 RUN python2 setup.py install
 
-RUN cd dts-client/
+RUN cd dts-server/
 RUN pipenv install
 
 # TODO how to run and rerun the below process, with CMD
-# python-m dts_client -i 60 $DATABASE_SERVER_ADDRESS:$PORT/data
+# python-m dts_server $SQLITE_DATABASE_FILE
